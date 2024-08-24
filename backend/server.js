@@ -12,7 +12,7 @@ const app = express();
 
 // Configura il middleware CORS
 app.use(cors({
-    origin: 'http://localhost:5500', // Sostituisci con il tuo dominio o frontend specifico
+    origin: 'https://daveethe.github.io', // Aggiorna questo con il tuo dominio GitHub Pages
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true // Permette di inviare cookie insieme alla richiesta
@@ -36,3 +36,4 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
