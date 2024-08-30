@@ -24,7 +24,7 @@ app.use(express.json());
 app.use('/api/vacations', vacationRoutes);
 
 // Connessione a MongoDB
-mongoose.connect('mongodb+srv://Davide:Davidux20>@cluster-vacation-planne.j1icu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster-vacation-planner');
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('Error connecting to MongoDB:', err));
 
