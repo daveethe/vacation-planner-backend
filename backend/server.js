@@ -24,12 +24,12 @@ app.use(express.json());
 app.use('/api/vacations', vacationRoutes);
 
 // Connessione a MongoDB
-require('dotenv').config(); // Assicurati che questa riga sia all'inizio
+const PORT = process.env.PORT || 5001;  // Continua ad usare 5001 per i test locali, ma PORT in produzione
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI)
 .then(() => {
     console.log('Connected to MongoDB');
-    const PORT = process.env.PORT || 5001;
+    // Avvio del server solo dopo aver stabilito la connessione a MongoDB
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
