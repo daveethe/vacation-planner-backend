@@ -24,10 +24,11 @@ app.use(express.json());
 app.use('/api/vacations', vacationRoutes);
 
 // Connessione a MongoDB
-mongoose.connect(process.env.MONGO_URI)
+require('dotenv').config(); // Assicurati che questa riga sia all'inizio
+
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 .then(() => {
     console.log('Connected to MongoDB');
-    // Avvio del server solo dopo aver stabilito la connessione a MongoDB
     const PORT = process.env.PORT || 5001;
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
