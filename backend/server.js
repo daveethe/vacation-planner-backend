@@ -23,9 +23,10 @@ app.use(express.json());
 // Configura le rotte
 app.use('/api/vacations', vacationRoutes);
 
-// Connessione a MongoDB
-const PORT = process.env.PORT || 5001;  // Continua ad usare 5001 per i test locali, ma PORT in produzione
+// Definisci la porta
+const PORT = process.env.PORT || 5001;
 
+// Connessione a MongoDB
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {
     console.log('Connected to MongoDB');
@@ -35,9 +36,3 @@ mongoose.connect(process.env.MONGO_URI)
     });
 })
 .catch(err => console.error('Error connecting to MongoDB:', err));
-
-// Avvio del server
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
