@@ -4,8 +4,10 @@ const mongoose = require('mongoose');
 const flightSchema = new mongoose.Schema({
     airline: String,
     flightNumber: String,
+    departureAirport: String,
+    arrivalAirport: String,
     departureTime: Date,
-    arrivalTime: Date,
+    arrivalTime: Date
 });
 
 // Definisci lo schema per gli hotel
