@@ -79,7 +79,16 @@ router.post('/:vacationId/flights', async (req, res) => {
         if (!vacation) {
             return res.status(404).json({ error: 'Vacation not found' });
         }
-        vacation.flights.push(req.body);
+        const flightData = {
+            airline: req.body.airline,
+            flightNumber: req.body.flightNumber,
+            departureAirport: req.body.departureAirport,
+            arrivalAirport: req.body.arrivalAirport,
+            departureTime: req.body.departureTime,
+            arrivalTime: req.body.arrivalTime
+        };
+
+        vacation.flights.push(flightData); // Usa flightData invece di req.body
         await vacation.save();
         res.status(201).json(vacation);
     } catch (err) {
@@ -100,8 +109,11 @@ router.put('/:vacationId/flights/:flightId', async (req, res) => {
             return res.status(404).json({ error: 'Flight not found' });
         }
 
+        // Aggiorna tutti i campi necessari del volo
         flight.airline = req.body.airline;
         flight.flightNumber = req.body.flightNumber;
+        flight.departureAirport = req.body.departureAirport; // Aggiunto
+        flight.arrivalAirport = req.body.arrivalAirport; // Aggiunto
         flight.departureTime = req.body.departureTime;
         flight.arrivalTime = req.body.arrivalTime;
 
