@@ -9,11 +9,25 @@ router.get('/:id', async (req, res) => {
         if (!vacation) {
             return res.status(404).json({ error: 'Vacation not found' });
         }
+
+        // Ordina l'itinerario per data e ora
+        vacation.itinerary = vacation.itinerary.sort((a, b) => {
+            // Combina la data e l'ora in un singolo oggetto Date
+            const dateA = new Date(`${a.date.toISOString().split('T')[0]}T${a.time || '00:00'}`);
+            const dateB = new Date(`${b.date.toISOString().split('T')[0]}T${b.time || '00:00'}`);
+            
+            return dateA - dateB; // Ordine crescente
+        });
+
+        // Log per verificare l'ordine degli itinerari
+        console.log('Itinerary after sorting:', vacation.itinerary);
+
         res.json(vacation);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 // Recupera tutte le vacanze
 router.get('/', async (req, res) => {
@@ -218,13 +232,99 @@ router.post('/:vacationId/itinerary', async (req, res) => {
         if (!vacation) {
             return res.status(404).json({ error: 'Vacation not found' });
         }
-        vacation.itinerary.push(req.body);
+
+        const itineraryItem = {
+            date: req.body.date,
+            time: req.body.time,
+            activities: req.body.activities,
+            coordinates: req.body.coordinates // Aggiungi le coordinate
+        };
+
+        vacation.itinerary.push(itineraryItem);
         await vacation.save();
         res.status(201).json(vacation);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+
+// Aggiungi un marker manuale all'itinerario di una vacanza
+router.post('/:vacationId/markers', async (req, res) => {
+    try {
+        console.log("Dati ricevuti dal client:", req.body);  // Log dei dati ricevuti
+
+        const { date, time, description, coordinates } = req.body;
+
+        // Validazione dei dati
+        if (!date || !time || !description || !coordinates || typeof coordinates.lat !== 'number' || typeof coordinates.lng !== 'number') {
+            return res.status(400).json({ error: 'Dati mancanti o invalidi' });
+        }
+
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        // Trova o crea la giornata di itinerario specifica per la data
+        let itineraryDay = vacation.itinerary.find(day => day.date.toISOString().split('T')[0] === new Date(date).toISOString().split('T')[0]);
+
+        if (!itineraryDay) {
+            // Se non esiste un itinerario per quella data, creane uno nuovo
+            itineraryDay = {
+                date: new Date(date),
+                activities: []
+            };
+            vacation.itinerary.push(itineraryDay);
+        }
+
+        // Aggiungi la nuova attività con le coordinate
+        itineraryDay.activities.push({
+            description,
+            time,
+            coordinates: {
+                lat: coordinates.lat,
+                lng: coordinates.lng
+            }
+        });
+
+        // Salva le modifiche nel database
+        await vacation.save();
+        console.log("Itinerario aggiornato:", vacation.itinerary);  // Log dell'itinerario aggiornato
+        res.status(201).json(vacation);  // Invia i dati aggiornati al client
+    } catch (err) {
+        console.error('Errore durante il salvataggio dell\'itinerario:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// Collega il marker all'itinerario esistente
+router.put('/:vacationId/markers/:markerId', async (req, res) => {
+    try {
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        const marker = vacation.itinerary.id(req.params.markerId);
+        if (!marker) {
+            return res.status(404).json({ error: 'Marker not found' });
+        }
+
+        marker.date = req.body.date;
+        marker.time = req.body.time;
+        marker.description = req.body.description;
+        marker.coordinates = req.body.coordinates;
+
+        await vacation.save();
+        res.status(200).json(vacation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 
 // Aggiorna un itinerario esistente
 router.put('/:vacationId/itinerary/:itineraryId', async (req, res) => {
@@ -271,5 +371,55 @@ router.delete('/:vacationId/itinerary/:itineraryId', async (req, res) => {
         res.status(500).json({ error: 'Errore durante l\'eliminazione dell\'itinerario' });
     }
 });
+
+
+// Aggiorna un marker esistente
+router.put('/:vacationId/markers/:markerId', async (req, res) => {
+    try {
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        const marker = vacation.markers.id(req.params.markerId);
+        if (!marker) {
+            return res.status(404).json({ error: 'Marker not found' });
+        }
+
+        marker.date = req.body.date;
+        marker.time = req.body.time;
+        marker.description = req.body.description;
+        marker.coordinates = req.body.coordinates;
+
+        await vacation.save();
+        res.status(200).json(vacation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Elimina un marker esistente
+router.delete('/:vacationId/markers/:markerId', async (req, res) => {
+    try {
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        const marker = vacation.markers.id(req.params.markerId);
+        if (!marker) {
+            return res.status(404).json({ error: 'Marker not found' });
+        }
+
+        vacation.markers.pull(req.params.markerId);
+
+        await vacation.save();
+        res.status(200).json(vacation);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error deleting marker' });
+    }
+});
+
 
 module.exports = router;
