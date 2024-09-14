@@ -2,10 +2,30 @@ const mongoose = require('mongoose');
 
 // Definisci lo schema per i voli
 const flightSchema = new mongoose.Schema({
-    airline: String,
-    flightNumber: String,
-    departureTime: Date,
-    arrivalTime: Date,
+    airline: {
+        type: String,
+        required: true
+    },
+    flightNumber: {
+        type: String,
+        required: true
+    },
+    departureAirport: {   // Aggiungi il campo per l'aeroporto di partenza
+        type: String,
+        required: true
+    },
+    arrivalAirport: {     // Aggiungi il campo per l'aeroporto di arrivo
+        type: String,
+        required: true
+    },
+    departureTime: {
+        type: Date,
+        required: true
+    },
+    arrivalTime: {
+        type: Date,
+        required: true
+    }
 });
 
 // Definisci lo schema per gli hotel
@@ -26,7 +46,6 @@ const itinerarySchema = new mongoose.Schema({
         lng: Number
     }
 });
-
 
 // Aggiorna lo schema delle vacanze per includere voli, hotel e itinerario
 const VacationSchema = new mongoose.Schema({
