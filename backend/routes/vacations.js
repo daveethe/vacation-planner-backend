@@ -339,7 +339,9 @@ router.put('/:vacationId/itinerary/:itineraryId', async (req, res) => {
             return res.status(404).json({ error: 'Itinerary not found' });
         }
 
+        // Aggiorna la data, l'orario e le attività
         itinerary.date = req.body.date;
+        itinerary.time = req.body.time;  // Aggiungi questa linea per aggiornare l'orario
         itinerary.activities = req.body.activities;
 
         await vacation.save();
@@ -348,6 +350,7 @@ router.put('/:vacationId/itinerary/:itineraryId', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 // Elimina un itinerario esistente
 router.delete('/:vacationId/itinerary/:itineraryId', async (req, res) => {
