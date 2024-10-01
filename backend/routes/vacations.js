@@ -1,6 +1,29 @@
 const express = require('express');
-const router = express.Router();
 const Vacation = require('../models/Vacation');
+const bcrypt = require('bcrypt');
+const router = express.Router();
+const dotenv = require('dotenv');
+dotenv.config();
+
+router.post('/verifyPassword', async (req, res) => {
+    console.log('Password ricevuta:', req.body.password);
+    const hash = process.env.PASSWORD_HASH;
+    console.log('Hash recuperato:', hash);
+
+    try {
+        const match = await bcrypt.compare(req.body.password, hash);
+        if (match) {
+            console.log('Password corretta');
+            return res.json({ success: true });
+        } else {
+            console.log('Password errata');
+            return res.json({ success: false });
+        }
+    } catch (error) {
+        console.error('Errore durante la verifica della password:', error);
+        return res.status(500).json({ success: false, message: 'Errore interno del server' });
+    }
+});
 
 // Recupera i dettagli di una singola vacanza
 router.get('/:id', async (req, res) => {
@@ -33,11 +56,14 @@ router.get('/:id', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const vacations = await Vacation.find();
+        console.log('Vacations recuperate:', vacations);  // Log per verificare il recupero dei dati
         res.json(vacations);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('Errore nel recupero delle vacanze:', err);
+        res.status(500).json({ message: err.message });
     }
 });
+
 
 // Crea una nuova vacanza
 router.post('/', async (req, res) => {
