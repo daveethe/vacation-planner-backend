@@ -451,4 +451,70 @@ router.delete('/:vacationId/markers/:markerId', async (req, res) => {
 });
 
 
+// Aggiungi una nuova spesa a una vacanza
+router.post('/:vacationId/expenses', async (req, res) => {
+    try {
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        const expense = {
+            amount: req.body.amount,
+            category: req.body.category,
+            description: req.body.description,
+        };
+
+        // Aggiungi la spesa alla vacanza
+        vacation.expenses.push(expense);
+        await vacation.save();
+
+        // Trova l'ultima spesa aggiunta (quella appena salvata)
+        const newExpense = vacation.expenses[vacation.expenses.length - 1];
+
+        res.status(201).json(newExpense);  // Restituisci l'intera spesa con l'ID
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// Recupera tutte le spese di una vacanza
+router.get('/:vacationId/expenses', async (req, res) => {
+    try {
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        res.json(vacation.expenses);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Elimina una spesa specifica di una vacanza
+router.delete('/:vacationId/expenses/:expenseId', async (req, res) => {
+    try {
+        const vacation = await Vacation.findById(req.params.vacationId);
+        if (!vacation) {
+            return res.status(404).json({ error: 'Vacation not found' });
+        }
+
+        // Rimuovi la spesa dall'array
+        const expenseIndex = vacation.expenses.findIndex(exp => exp._id.toString() === req.params.expenseId);
+        if (expenseIndex === -1) {
+            return res.status(404).json({ error: 'Expense not found' });
+        }
+
+        vacation.expenses.splice(expenseIndex, 1);  // Rimuovi la spesa dall'array
+        await vacation.save();  // Salva le modifiche
+
+        res.status(204).send();  // Risposta vuota ma con successo
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 module.exports = router;
