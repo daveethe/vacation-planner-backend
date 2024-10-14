@@ -47,6 +47,23 @@ const itinerarySchema = new mongoose.Schema({
     }
 });
 
+// Definisci lo schema per le spese
+const expenseSchema = new mongoose.Schema({
+    amount: {
+        type: Number,
+        required: true,
+    },
+    category: {
+        type: String,
+        required: true,
+        enum: ['flight', 'hotel', 'car', 'groceries', 'activities', 'other'], // Le categorie possibili
+    },
+    description: {
+        type: String,
+        required: true,
+    }
+});
+
 // Aggiorna lo schema delle vacanze per includere voli, hotel e itinerario
 const VacationSchema = new mongoose.Schema({
     name: {
@@ -64,6 +81,7 @@ const VacationSchema = new mongoose.Schema({
     flights: [flightSchema],  // Array di oggetti volo
     hotels: [hotelSchema],    // Array di oggetti hotel
     itinerary: [itinerarySchema], // Array di oggetti itinerario
+    expenses: [expenseSchema], // Aggiungi le spese come array
 });
 
 module.exports = mongoose.model('Vacation', VacationSchema);
