@@ -34,7 +34,9 @@ const hotelSchema = new mongoose.Schema({
     address: String,
     checkInDate: Date,
     checkOutDate: Date,
+    bookingLink: { type: String, required: false }  // Campo facoltativo
 });
+
 
 // Definisci lo schema per l'itinerario
 const itinerarySchema = new mongoose.Schema({
