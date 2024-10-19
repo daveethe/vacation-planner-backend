@@ -44,6 +44,7 @@ router.get('/:id', async (req, res) => {
 
         // Log per verificare l'ordine degli itinerari
         console.log('Itinerary after sorting:', vacation.itinerary);
+        console.log('Dati degli hotel:', vacation.hotels);
 
         res.json(vacation);
     } catch (err) {
@@ -190,6 +191,8 @@ router.delete('/:vacationId/flights/:flightId', async (req, res) => {
 // Aggiungi un hotel a una vacanza
 router.post('/:vacationId/hotels', async (req, res) => {
     try {
+        console.log('Dati ricevuti:', req.body);  // Verifica se il bookingLink viene ricevuto
+
         const vacation = await Vacation.findById(req.params.vacationId);
         if (!vacation) {
             return res.status(404).json({ error: 'Vacation not found' });
@@ -201,6 +204,7 @@ router.post('/:vacationId/hotels', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 // Aggiorna un hotel esistente
 router.put('/:vacationId/hotels/:hotelId', async (req, res) => {
@@ -219,6 +223,7 @@ router.put('/:vacationId/hotels/:hotelId', async (req, res) => {
         hotel.address = req.body.address;
         hotel.checkInDate = req.body.checkInDate;
         hotel.checkOutDate = req.body.checkOutDate;
+        hotel.bookingLink = req.body.bookingLink;
 
         await vacation.save();
         res.status(200).json(vacation);
